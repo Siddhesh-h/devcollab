@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth/auth.routes";
 import projectRoutes from "./routes/project/project.routes";
+import taskRoutes from "./routes/task/task.routes";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
 
 app.get("/", (req, res) => {
     res.send("DevCollab API Running 🚀");
