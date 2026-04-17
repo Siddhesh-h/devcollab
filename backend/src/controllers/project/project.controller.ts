@@ -44,3 +44,35 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: "Error fetching projects" });
     }
 };
+
+export const addMember = async (req: AuthRequest, res: Response) => {
+    try {
+        const { projectId, userId, role } = req.body;
+
+        const admin = await prisma.projectMember.findFirst({
+            where: {
+                projectId,
+                userId: req.userId,
+                role: "ADMIN",
+            },
+        });
+
+        if (!admin) {
+            return res
+                .status(403)
+                .json({ message: "Only admin can add members" });
+        }
+
+        const member = await prisma.projectMember.create({
+            data: {
+                projectId,
+                userId,
+                role: role || "MEMBER",
+            },
+        });
+
+        res.json(member);
+    } catch (error) {
+        res.status(500).json({ message: "Error adding member" });
+    }
+};
