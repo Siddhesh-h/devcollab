@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../../utils/prisma";
 import { AuthRequest } from "../../middleware/auth.middleware";
+import { io } from "../../index";
 
 //create
 export const createTask = async (req: AuthRequest, res: Response) => {
@@ -26,6 +27,8 @@ export const createTask = async (req: AuthRequest, res: Response) => {
                 projectId,
             },
         });
+
+        io.to(projectId).emit("task_created", task);
 
         res.status(201).json(task);
     } catch (error) {
@@ -90,6 +93,8 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
             },
         });
 
+        io.to(task.projectId).emit("task_updated", task);
+
         res.json(task);
     } catch (error) {
         res.status(500).json({ message: "Error updating task" });
@@ -101,9 +106,17 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params as { id: string };
 
+        const task = await prisma.task.findUnique({ where: { id } });
+
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+
         await prisma.task.delete({
             where: { id },
         });
+
+        io.to(task.projectId).emit("task_deleted", id);
 
         res.json({ message: "Task deleted" });
     } catch (error) {
