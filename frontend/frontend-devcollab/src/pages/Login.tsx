@@ -15,6 +15,7 @@ export default function Login() {
             });
 
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("userId", res.data.user.id);
             navigate("/dashboard");
         }catch(err) {
             alert("Login failed");

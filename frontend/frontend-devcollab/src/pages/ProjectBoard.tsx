@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { api } from "../services/api";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { socket } from "../services/socket"
+import Chat from "../components/chat"
 
 
 type Task = {
@@ -134,6 +135,8 @@ export default function ProjectBoard() {
                     ))}
                 </div>
             </DragDropContext>
+
+            <Chat projectId={id!} />
         </div>
     )
 }
