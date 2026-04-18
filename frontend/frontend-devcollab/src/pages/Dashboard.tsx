@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import { api } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
     const [projects, setProjects] = useState([]);
     const [name, setName] = useState("");
+    const navigate = useNavigate();
 
     const fetchProjects =  async () => {
         const res = await api.get("/projects");
@@ -29,7 +31,7 @@ export default function Dashboard() {
             </div>
             <div className="grid grid-cols-3 gap-4">
                 {projects.map((p: any)=> (
-                    <div key={p.id} className="p-4 border rounded shadow">
+                    <div key={p.id} onClick={() => navigate(`/project/${p.id}`)} className="p-4 border rounded shadow cursor-pointer">
                         {p.name}
                     </div>
                 ))}
