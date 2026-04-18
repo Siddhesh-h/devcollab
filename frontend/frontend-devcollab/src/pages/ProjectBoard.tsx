@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../services/api";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { socket } from "../services/socket"
 
 
 type Task = {
@@ -30,6 +31,16 @@ export default function ProjectBoard() {
 
     useEffect(()=>{
         fetchTasks();
+
+        socket.emit("join_project", id);
+
+        // return () => {
+        //     socket.disconnect();
+        // }
+
+        return () => {
+            socket.emit("leave_project", id);
+        };
     }, []);
 
     const grouped = {
@@ -50,6 +61,28 @@ export default function ProjectBoard() {
 
         fetchTasks();
     }
+
+
+    useEffect(()=> {
+        socket.on("task_created", (task)=> {
+            setTasks((prev) => [...prev, task]);
+        });
+
+        socket.on("task_updated", (updatedTask) => {
+            setTasks((prev) => 
+                prev.map((t) => (t.id === updatedTask.id ? updatedTask  : t))
+        );
+        });
+
+        socket.on("task_deleted", (taskId) => {
+            setTasks((prev) => prev.filter((t)=> t.id !== taskId));
+        });
+        return () => {
+            socket.off("task_created");
+            socket.off("task_updated");
+            socket.off("task_deleted");
+        }
+    }, []);
     return (
         <div className="p-6">
             <h1 className="text-xl font-bold mb-4">Kanban Board</h1>

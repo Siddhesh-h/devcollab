@@ -39,10 +39,15 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
     });
+
+    socket.on("leave_project", (projectId) => {
+        socket.leave(projectId);
+        console.log(`User left project ${projectId}`);
+    });
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
