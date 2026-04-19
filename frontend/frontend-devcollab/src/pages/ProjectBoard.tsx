@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { socket } from "../services/socket";
@@ -11,8 +11,22 @@ type Task = {
 };
 export default function ProjectBoard() {
     const { id } = useParams();
+    // Store project info
+    const [project, setProject] = useState<any>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [title, setTitle] = useState("");
+
+    const navigate = useNavigate();
+
+    const fetchProject = async () => {
+        try {
+            const res = await api.get("/projects");
+            const found = res.data.find((p: any) => p.id === id);
+            setProject(found);
+        } catch (err) {
+            console.log("Error fetching project");
+        }
+    };
 
     const fetchTasks = async () => {
         const res = await api.get(`/tasks/${id}`);
@@ -33,6 +47,7 @@ export default function ProjectBoard() {
 
         // Fetch tasks for current project
         fetchTasks();
+        fetchProject();
 
         // Join correct project room
         socket.emit("join_project", id);
@@ -41,7 +56,7 @@ export default function ProjectBoard() {
             // Leave previous project room
             socket.emit("leave_project", id);
         };
-    }, [id]); // ✅ IMPORTANT
+    }, [id]);
 
     const grouped = {
         TODO: tasks.filter((t) => t.status === "TODO"),
@@ -88,20 +103,34 @@ export default function ProjectBoard() {
             socket.off("task_updated", handleUpdate);
             socket.off("task_deleted", handleDelete);
         };
-    }, [id]); // ✅ IMPORTANT
+    }, [id]);
     return (
         <div className="h-full flex flex-col">
             {/* ================= HEADER ================= */}
             <div className="mb-4">
-                <h1 className="text-lg font-semibold text-gray-800">
-                    Kanban Board
-                </h1>
+                <div className="flex items-center justify-between mb-4">
+                    {/* Left: Back + Project Name */}
+                    <div className="flex items-center gap-3">
+                        {/* Back Button */}
+                        <button
+                            onClick={() => navigate("/dashboard")}
+                            className="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                            ← Back
+                        </button>
+
+                        {/* Project Name */}
+                        <h1 className="text-lg font-semibold text-gray-800">
+                            {project?.name || "Project"}
+                        </h1>
+                    </div>
+                </div>
             </div>
 
             {/* ================= CREATE TASK ================= */}
             <div className="flex gap-2 mb-6">
                 <input
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64"
+                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     placeholder="Task title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -109,14 +138,14 @@ export default function ProjectBoard() {
 
                 <button
                     onClick={createTask}
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm"
+                    className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
                 >
                     Add
                 </button>
             </div>
 
             {/* ================= KANBAN BOARD ================= */}
-            <div className="flex-1 overflow-x-auto">
+            <div className="flex-1 overflow-x-auto pb-2">
                 <DragDropContext onDragEnd={onDragEnd}>
                     {/* Horizontal board (Trello style) */}
                     <div className="flex gap-4">
@@ -126,7 +155,7 @@ export default function ProjectBoard() {
                                     <div
                                         ref={provided.innerRef}
                                         {...provided.droppableProps}
-                                        className="w-72 bg-gray-100/70 rounded-xl p-3 flex-shrink-0"
+                                        className="w-72 bg-gray-100/60 rounded-xl p-3 flex flex-col"
                                     >
                                         {/* Column Title */}
                                         <h2 className="text-sm font-semibold text-gray-700 mb-3">
@@ -134,26 +163,35 @@ export default function ProjectBoard() {
                                         </h2>
 
                                         {/* Tasks */}
-                                        {grouped[
-                                            col as keyof typeof grouped
-                                        ].map((task, index) => (
-                                            <Draggable
-                                                draggableId={task.id}
-                                                index={index}
-                                                key={task.id}
-                                            >
-                                                {(provided) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="bg-white rounded-lg p-3 mb-2 shadow-sm border border-gray-200 text-sm"
-                                                    >
-                                                        {task.title}
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
+                                        {grouped[col as keyof typeof grouped]
+                                            .length === 0 ? (
+                                            <div className="text-xs text-gray-400 text-center mt-6">
+                                                No tasks
+                                            </div>
+                                        ) : (
+                                            grouped[
+                                                col as keyof typeof grouped
+                                            ].map((task, index) => (
+                                                <Draggable
+                                                    draggableId={task.id}
+                                                    index={index}
+                                                    key={task.id}
+                                                >
+                                                    {(provided) => (
+                                                        <div
+                                                            ref={
+                                                                provided.innerRef
+                                                            }
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            className="bg-white rounded-lg p-3 mb-2 shadow-sm border border-gray-200 text-sm hover:shadow-md hover:-translate-y-[1px] transition cursor-pointer"
+                                                        >
+                                                            {task.title}
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            ))
+                                        )}
 
                                         {provided.placeholder}
                                     </div>
