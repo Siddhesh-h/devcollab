@@ -13,16 +13,26 @@ export default function ProjectBoard() {
     const { id } = useParams();
     // Store project info
     const [project, setProject] = useState<any>(null);
+    // Store current user's role in this project
+    const [role, setRole] = useState<string | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [title, setTitle] = useState("");
 
     const navigate = useNavigate();
+    const userId = localStorage.getItem("userId");
 
     const fetchProject = async () => {
         try {
             const res = await api.get("/projects");
             const found = res.data.find((p: any) => p.id === id);
             setProject(found);
+
+            //Find current user's role
+            const member = found?.members?.find(
+                (m: any) => m.userId === userId,
+            );
+
+            setRole(member?.role || null);
         } catch (err) {
             console.log("Error fetching project");
         }
@@ -127,22 +137,30 @@ export default function ProjectBoard() {
                 </div>
             </div>
 
-            {/* ================= CREATE TASK ================= */}
-            <div className="flex gap-2 mb-6">
-                <input
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                    placeholder="Task title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+            {role === "MEMBER" && (
+                <div className="text-xs text-gray-500 mb-4">
+                    You have view-only access in this project
+                </div>
+            )}
 
-                <button
-                    onClick={createTask}
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-                >
-                    Add
-                </button>
-            </div>
+            {/* ================= CREATE TASK ================= */}
+            {role === "ADMIN" && (
+                <div className="flex gap-2 mb-6">
+                    <input
+                        className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                        placeholder="Task title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+
+                    <button
+                        onClick={createTask}
+                        className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
+                    >
+                        Add
+                    </button>
+                </div>
+            )}
 
             {/* ================= KANBAN BOARD ================= */}
             <div className="flex-1 overflow-x-auto pb-2">
