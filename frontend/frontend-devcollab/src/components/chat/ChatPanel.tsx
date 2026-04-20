@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "../../services/socket";
 import { api } from "../../services/api";
+import { showToast } from "../ui/ToastContainer";
 
 export default function ChatPanel() {
     const [messages, setMessages] = useState<any[]>([]);
+    // Activity feed
     const [input, setInput] = useState("");
 
     // Auto-scroll reference
@@ -60,8 +62,25 @@ export default function ChatPanel() {
             setMessages((prev) => [...prev, msg]);
         });
 
+        socket.on("task_created", (task) => {
+            if (!task?.title) return;
+            showToast(`Task created: ${task.title}`);
+        });
+
+        socket.on("task_updated", (task) => {
+            if (!task?.status) return;
+            showToast(`Task moved to ${task.status}`);
+        });
+
+        socket.on("task_deleted", () => {
+            showToast("Task deleted");
+        });
+
         return () => {
             socket.off("receive_message");
+            socket.off("task_created");
+            socket.off("task_updated");
+            socket.off("task_deleted");
         };
     }, [projectId]);
 
