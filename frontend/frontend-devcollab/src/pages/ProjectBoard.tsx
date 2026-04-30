@@ -105,7 +105,7 @@ export default function ProjectBoard() {
         };
     }, [id]);
     return (
-        <div className="h-full flex flex-col">
+        <div className="flex-1 m-10 bg-white rounded-[32px] h-[820px] p-6 shadow">
             {/* ================= HEADER ================= */}
             <div className="mb-4">
                 <div className="flex items-center justify-between mb-4">
@@ -120,7 +120,7 @@ export default function ProjectBoard() {
                         </button>
 
                         {/* Project Name */}
-                        <h1 className="text-lg font-semibold text-gray-800">
+                        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
                             {project?.name || "Project"}
                         </h1>
                     </div>
@@ -128,54 +128,93 @@ export default function ProjectBoard() {
             </div>
 
             {/* ================= CREATE TASK ================= */}
-            <div className="flex gap-2 mb-6">
-                <input
-                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                    placeholder="Task title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+            <div>
+                <h2 className="text-gray-600 mb-3">Add Task :</h2>
 
-                <button
-                    onClick={createTask}
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800 transition"
-                >
-                    Add
-                </button>
+                <div className="flex gap-3">
+                    <input
+                        placeholder="Task title"
+                        className="flex-1 p-3 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-purple-400"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+
+                    <button
+                        onClick={createTask}
+                        className="px-4 py-2 rounded-2xl text-white font-medium bg-gradient-to-r from-purple-500 to-indigo-500 hover:opacity-90 transition"
+                    >
+                        Add
+                    </button>
+                </div>
             </div>
 
             {/* ================= KANBAN BOARD ================= */}
-            <div className="flex-1 overflow-x-auto pb-2">
+            <div className="flex justify-between mt-5">
                 <DragDropContext onDragEnd={onDragEnd}>
-                    {/* Horizontal board (Trello style) */}
-                    <div className="flex gap-4">
-                        {["TODO", "IN_PROGRESS", "DONE"].map((col) => (
-                            <Droppable droppableId={col} key={col}>
-                                {(provided) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="w-72 bg-gray-100/60 rounded-xl p-3 flex flex-col"
-                                    >
-                                        {/* Column Title */}
-                                        <h2 className="text-sm font-semibold text-gray-700 mb-3">
-                                            {col.replace("_", " ")}
-                                        </h2>
+                    {/* TODO */}
+                    <Droppable droppableId="TODO">
+                        {(provided) => (
+                            <div>
+                                <h3 className="p-2">TODO</h3>
 
-                                        {/* Tasks */}
-                                        {grouped[col as keyof typeof grouped]
-                                            .length === 0 ? (
-                                            <div className="text-xs text-gray-400 text-center mt-6">
-                                                No tasks
-                                            </div>
-                                        ) : (
-                                            grouped[
-                                                col as keyof typeof grouped
-                                            ].map((task, index) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="bg-gray-200 w-[27rem] h-[35rem] p-3 rounded-2xl overflow-y-auto"
+                                >
+                                    {grouped["TODO"].length === 0 ? (
+                                        <div className="text-sm text-gray-400 text-center mt-6">
+                                            No tasks
+                                        </div>
+                                    ) : (
+                                        grouped["TODO"].map((task, index) => (
+                                            <Draggable
+                                                key={task.id}
+                                                draggableId={task.id}
+                                                index={index}
+                                            >
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className="bg-white p-4 rounded-2xl mb-3 shadow hover:shadow-md transition"
+                                                    >
+                                                        {task.title}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))
+                                    )}
+
+                                    {provided.placeholder}
+                                </div>
+                            </div>
+                        )}
+                    </Droppable>
+
+                    {/* IN PROGRESS */}
+                    <Droppable droppableId="IN_PROGRESS">
+                        {(provided) => (
+                            <div>
+                                <h3 className="p-2">IN PROGRESS</h3>
+
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="bg-gray-200 w-[27rem] h-[35rem] p-3 rounded-2xl overflow-y-auto"
+                                >
+                                    {grouped["IN_PROGRESS"].length === 0 ? (
+                                        <div className="text-sm text-gray-400 text-center mt-6">
+                                            No tasks
+                                        </div>
+                                    ) : (
+                                        grouped["IN_PROGRESS"].map(
+                                            (task, index) => (
                                                 <Draggable
+                                                    key={task.id}
                                                     draggableId={task.id}
                                                     index={index}
-                                                    key={task.id}
                                                 >
                                                     {(provided) => (
                                                         <div
@@ -184,21 +223,63 @@ export default function ProjectBoard() {
                                                             }
                                                             {...provided.draggableProps}
                                                             {...provided.dragHandleProps}
-                                                            className="bg-white rounded-lg p-3 mb-2 shadow-sm border border-gray-200 text-sm hover:shadow-md hover:-translate-y-[1px] transition cursor-pointer"
+                                                            className="bg-white p-4 rounded-2xl mb-3 shadow hover:shadow-md transition"
                                                         >
                                                             {task.title}
                                                         </div>
                                                     )}
                                                 </Draggable>
-                                            ))
-                                        )}
+                                            ),
+                                        )
+                                    )}
 
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        ))}
-                    </div>
+                                    {provided.placeholder}
+                                </div>
+                            </div>
+                        )}
+                    </Droppable>
+
+                    {/* DONE */}
+                    <Droppable droppableId="DONE">
+                        {(provided) => (
+                            <div>
+                                <h3 className="p-2">DONE</h3>
+
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="bg-gray-200 w-[27rem] h-[35rem] p-3 rounded-2xl overflow-y-auto"
+                                >
+                                    {grouped["DONE"].length === 0 ? (
+                                        <div className="text-sm text-gray-400 text-center mt-6">
+                                            No tasks
+                                        </div>
+                                    ) : (
+                                        grouped["DONE"].map((task, index) => (
+                                            <Draggable
+                                                key={task.id}
+                                                draggableId={task.id}
+                                                index={index}
+                                            >
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className="bg-white p-4 rounded-2xl mb-3 shadow hover:shadow-md transition"
+                                                    >
+                                                        {task.title}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))
+                                    )}
+
+                                    {provided.placeholder}
+                                </div>
+                            </div>
+                        )}
+                    </Droppable>
                 </DragDropContext>
             </div>
         </div>

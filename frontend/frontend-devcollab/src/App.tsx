@@ -1,42 +1,27 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-// Pages
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import ProjectBoard from "./pages/ProjectBoard";
-
-// Layout
-import AppLayout from "./layout/AppLayout";
+// import Messages from "./layouts/Messages";
+import Dashboard from "../src/pages/Dashboard";
+import ProjectBoard from "../src/pages/ProjectBoard";
+import AppLayout from "../src/layout/AppLayout";
+import Messages from "./pages/Messages";
 
 function App() {
     return (
         <Routes>
-            {/* ================= AUTH ROUTES ================= */}
-            {/* These pages DO NOT use AppLayout */}
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<AppLayout />}>
+                {/* Default */}
+                <Route path="/" element={<Navigate to="/dashboard" />} />
 
-            {/* ================= APP ROUTES ================= */}
-            {/* These pages USE AppLayout */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/messages" element={<Messages />} />
 
-            <Route
-                path="/dashboard"
-                element={
-                    <AppLayout>
-                        <Dashboard />
-                    </AppLayout>
-                }
-            />
+                {/* 🔥 THIS IS MISSING */}
+                <Route path="/project/:id" element={<ProjectBoard />} />
 
-            <Route
-                path="/project/:id"
-                element={
-                    <AppLayout>
-                        <ProjectBoard />
-                    </AppLayout>
-                }
-            />
+                {/* fallback */}
+                <Route path="*" element={<Navigate to="/dashboard" />} />
+            </Route>
         </Routes>
     );
 }
