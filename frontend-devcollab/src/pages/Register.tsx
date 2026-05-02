@@ -3,41 +3,39 @@ import { api } from "../services/api";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function Login() {
+export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = async () => {
+    const handleRegister = async () => {
         try {
             if (!email || !password) {
                 return toast.error("Please fill all fields");
             }
 
-            const res = await api.post("/auth/login", {
+            await api.post("/auth/register", {
                 email,
                 password,
             });
 
-            localStorage.setItem("token", res.data.token);
-
-            toast.success("Login successful 🎉");
+            toast.success("Account created successfully 🎉");
 
             setTimeout(() => {
-                window.location.href = "/dashboard";
+                window.location.href = "/login";
             }, 1000);
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Login failed");
+            toast.error(err.response?.data?.message || "Register failed");
         }
     };
 
     return (
         <div className="h-screen flex bg-gray-50">
             {/* LEFT SIDE */}
-            <div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-600 to-indigo-700 text-white items-center justify-center">
+            <div className="hidden md:flex flex-1 bg-gradient-to-br from-purple-600 to-indigo-700 text-white items-center justify-center">
                 <div className="max-w-md text-center">
                     <h1 className="text-4xl font-bold mb-4">DevCollab</h1>
                     <p className="text-lg opacity-90">
-                        Collaborate. Build. Deliver faster with your team.
+                        Start managing your team projects like a pro.
                     </p>
                 </div>
             </div>
@@ -46,13 +44,13 @@ export default function Login() {
             <div className="flex-1 flex items-center justify-center">
                 <div className="w-[380px]">
                     <h2 className="text-2xl font-semibold mb-6">
-                        Log in to your account
+                        Create your account
                     </h2>
 
                     <input
                         type="email"
                         placeholder="Email"
-                        className="w-full p-3 border rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-3 border rounded-lg mb-4 outline-none focus:ring-2 focus:ring-indigo-500"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -60,25 +58,25 @@ export default function Login() {
                     <input
                         type="password"
                         placeholder="Password"
-                        className="w-full p-3 border rounded-lg mb-4 outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-3 border rounded-lg mb-4 outline-none focus:ring-2 focus:ring-indigo-500"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
 
                     <button
-                        onClick={handleLogin}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                        onClick={handleRegister}
+                        className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition"
                     >
-                        Login
+                        Register
                     </button>
 
                     <p className="text-sm mt-4">
-                        Don’t have an account?{" "}
+                        Already have an account?{" "}
                         <Link
-                            to="/register"
-                            className="text-blue-600 font-medium"
+                            to="/login"
+                            className="text-indigo-600 font-medium"
                         >
-                            Sign up
+                            Login
                         </Link>
                     </p>
                 </div>
