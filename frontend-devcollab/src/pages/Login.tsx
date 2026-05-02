@@ -6,12 +6,15 @@ import toast from "react-hot-toast";
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
+        if (!email || !password) {
+            return toast.error("Please fill all fields");
+        }
+
         try {
-            if (!email || !password) {
-                return toast.error("Please fill all fields");
-            }
+            setLoading(true);
 
             const res = await api.post("/auth/login", {
                 email,
@@ -24,9 +27,11 @@ export default function Login() {
 
             setTimeout(() => {
                 window.location.href = "/dashboard";
-            }, 1000);
+            }, 800);
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Login failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,9 +72,20 @@ export default function Login() {
 
                     <button
                         onClick={handleLogin}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                        disabled={loading}
+                        className={`w-full py-3 rounded-lg text-white transition ${
+                            loading
+                                ? "bg-blue-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700"
+                        }`}
                     >
-                        Login
+                        {loading ? (
+                            <div className="flex justify-center">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        ) : (
+                            "Login"
+                        )}
                     </button>
 
                     <p className="text-sm mt-4">
